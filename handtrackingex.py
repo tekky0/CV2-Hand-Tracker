@@ -15,6 +15,9 @@ if(user_input == 'y'):
     ser = sr.Serial('COM6', 9600)
     time.sleep(1)
 
+
+#determinant to which fingers are up and which ones are down to update the hand landmark list, which is later send to the
+#pyToArduinoInterface for processing into strings to be sent to serial communications
 def count1():
     if fin.multi_hand_landmarks:
         for hand_landmarks in fin.multi_hand_landmarks:
@@ -24,7 +27,7 @@ def count1():
             thumb_knuckle = hand_landmarks.landmark[3]
             other_difference_length = abs(thumb_knuckle.y - middle_knuckle.y)
             difference_length = abs(thumbtip.y - middle_knuckle.y)
-            other_other_difference_length = abs(thumbtip.y - thumb_knuckle.y)
+            #other_other_difference_length = abs(thumbtip.y - thumb_knuckle.y)
             thumb_to_middle_threshold = 0.033
             if difference_length < thumb_to_middle_threshold or other_difference_length > 0.3:
                 finger_list_hand1[0] = 0
@@ -37,6 +40,8 @@ def count1():
             if hand_landmarks.landmark[20].y < hand_landmarks.landmark[18].y:
                 finger_list_hand1[4] = 1
 
+
+#encode and hand point info to arduino microcontroller to instruct which LED to turn on
 def pyToArduinoInterface(finger_list_hand1):
     data = ','.join(map(str, finger_list_hand1)) + '\n'
     ser.write(data.encode('utf-8'))
@@ -56,8 +61,11 @@ while vid.isOpened():
     flipframe = cv.flip(frame, 1)
     cv.imshow('video',flipframe)
     count1()
+    #Once update is given from the function count1() it will go through each index of a list array of finger_list_hand1.
+    #At the moment the hand list index is currently updated in a for loop which goes through each index
     for i in range(0, len(finger_list_hand1)):
         totality = totality + finger_list_hand1[i]
+    #then if you said yes to init the pyToArduinoInterface it will then send the ubdated substring.
     if(user_input == 'y'):
         pyToArduinoInterface(finger_list_hand1)
     print(f"Fingers: {finger_list_hand1}, Total:{totality}")
