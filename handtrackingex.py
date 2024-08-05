@@ -71,6 +71,6 @@ while vid.isOpened():
     print(f"Fingers: {finger_list_hand1}, Total:{totality}")
     if cv.waitKey(1) & 0xFF == ord('d'):
         break
-
+#after wait key is pressed, while loop breaks and video is released from capture and all extra windows running will be destroyed.
 vid.release()
 cv.destroyAllWindows()
